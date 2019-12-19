@@ -1,10 +1,17 @@
 import Vue from 'vue'
-import VueRouter from 'vue-router'
+import Router from 'vue-router'
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
+import Cart from '../views/Cart.vue'
+import History from '@/utils/history'
 
-Vue.use(VueRouter)
-
+Vue.use(Router);
+Vue.use(History);
+Router.prototype.isBack = false;
+Router.prototype.goBack = function () {
+  this.back();
+  this.isBack = true;
+}
 const routes = [
   {
     path: '/',
@@ -17,6 +24,11 @@ const routes = [
     component: Login
   },
   {
+    path: '/cart',
+    name: 'cart',
+    component: Cart
+  },
+  {
     path: '/about',
     name: 'about',
     meta: { auth: true },
@@ -27,7 +39,7 @@ const routes = [
   }
 ]
 
-const router = new VueRouter({
+const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
@@ -49,5 +61,13 @@ router.beforeEach((to, from, next) => {
     next();
   }
 });
+router.afterEach((to) => {
+  if (router.isBack) {
+    History.pop();
+    router.isBack = false;
+  } else {
+    History.push(to.path);
+  }
+})
 
 export default router
